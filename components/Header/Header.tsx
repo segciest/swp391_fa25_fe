@@ -1,12 +1,32 @@
-'use client';
-
-import { useState } from 'react';
+"use client";
+import React, { useState, useEffect, useRef } from 'react';
 
 export default function Header() {
     const [isOpen, setIsOpen] = useState(false);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef<HTMLLIElement>(null);
 
     const handleToggle = () => setIsOpen(!isOpen);
-    const closeMenu = () => setIsOpen(false);
+    const closeMenu = () => {
+        setIsOpen(false);
+        setIsDropdownOpen(false);
+    };
+    
+    const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
+
+    // Đóng dropdown khi click bên ngoài
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const navLinks = [
         { name: 'TRANG CHỦ', href: '/' },
@@ -15,6 +35,11 @@ export default function Header() {
         { name: 'HÌNH ẢNH', href: '/hinh-anh' },
         { name: 'FEEDBACK', href: '/feedback' },
         { name: 'TIN TỨC', href: '/tin-tuc' },
+    ];
+
+    const listingOptions = [
+        { name: 'Xe Điện', href: '/listing/electric-car' },
+        { name: 'Pin', href: '/listing/battery' },
     ];
 
     return (
@@ -82,6 +107,47 @@ export default function Header() {
                                     </a>
                                 </li>
                             ))}
+                            
+                            {/* Listing Dropdown */}
+                            <li className="relative" ref={dropdownRef}>
+                                <button 
+                                    onClick={toggleDropdown}
+                                    className="flex items-center py-2 pr-4 pl-3 text-gray-700 rounded hover:bg-gray-200 font-medium w-full text-left lg:w-auto"
+                                >
+                                    ĐĂNG TIN
+                                    <svg className={`w-4 h-4 ml-1 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                    </svg>
+                                </button>
+                                
+                                {/* Dropdown Menu */}
+                                {isDropdownOpen && (
+                                    <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50">
+                                        <div className="py-1">
+                                            {listingOptions.map((option) => (
+                                                <a
+                                                    key={option.name}
+                                                    href={option.href}
+                                                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                                                    onClick={closeMenu}
+                                                >
+                                                    {option.name === 'Xe Điện' && (
+                                                        <svg className="w-4 h-4 mr-2 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+                                                        </svg>
+                                                    )}
+                                                    {option.name === 'Pin' && (
+                                                        <svg className="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fillRule="evenodd" d="M3 6a3 3 0 013-3h8a3 3 0 013 3v8a3 3 0 01-3 3H6a3 3 0 01-3-3V6zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clipRule="evenodd" />
+                                                        </svg>
+                                                    )}
+                                                    {option.name}
+                                                </a>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </li>
                         </ul>
                     </div>
                 </div>
